@@ -10,12 +10,12 @@ from tensorflow_core.python.keras.layers import LeakyReLU, BatchNormalization
 
 # Model configuration
 img_width, img_height = 28, 28
-batch_size = 150
-no_epochs = 5
+batch_size = 100
+no_epochs = 15
 validation_split = 0.2
 verbosity = 1
 max_norm_value = 2.0
-noise_factor = 0.55
+noise_factor = 0.3
 number_of_visualizations = 6
 
 # Load MNIST dataset
@@ -51,75 +51,40 @@ noisy_input = pure + noise_factor * noise
 noisy_input_test = pure_test + noise_factor * noise_test
 # Create the model
 encoder = Sequential()
-input_img = tf.keras.layers.Input(shape=(28,28,1))
-#encoder
-encoder.add(input_img)
-encoder.add(Conv2D(16, (3,3),strides = 1 , activation = 'relu',padding='same'))
-encoder.add(MaxPooling2D((2,2)))
-encoder.add(Conv2D(8,(3,3),strides = 1, activation='relu',padding='same'))
-encoder.add(MaxPooling2D((2,2),padding = 'same'))
-encoder.add(Conv2D(8,(3,3),strides = 1,activation = 'relu',padding='same'))
-#decoder network
-decoder = Sequential()
-decoder.add(Conv2DTranspose(8,(3,3),strides = 1,activation='relu',padding='same'))
-decoder.add(UpSampling2D((2,2)))
-decoder.add(Conv2DTranspose(16,(3,3),strides = 1,activation='relu',padding = 'same'))
-decoder.add(UpSampling2D((2,2)))
-decoder.add(Conv2DTranspose(1,(3,3),strides = 1, activation='sigmoid',padding  ='same'))
-model = Sequential([encoder,decoder])
-#model = tf.keras.Model(input_img, m)
-model.compile(optimizer='Adam', loss='binary_crossentropy')
-#model.summary()
-
-"""encoder = Sequential()
-for f in (256,128):
-    # apply a CONV => RELU => BN operation
-    encoder.add(Conv2D(f, (3, 3), strides=2, padding="same", activation='relu'))
-    encoder.add(LeakyReLU(alpha=0.2))
-    encoder.add(BatchNormalization(axis=-1))
-
-decoder = Sequential()
-for f in (128,256):
-    # apply a CONV => RELU => BN operation
-    decoder.add(Conv2DTranspose(f, (3, 3), strides=2, padding="same", activation='relu'))
-    decoder.add(LeakyReLU(alpha=0.2))
-    decoder.add(BatchNormalization(axis=-1))"""
-"""encoder = Sequential()
+encoder.add(tf.keras.layers.Input(shape=(28, 28, 1)))
 encoder.add(Conv2D(64, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='relu',
-                 kernel_initializer='he_uniform', input_shape=input_shape))
+                   kernel_initializer='he_uniform', input_shape=input_shape))
 encoder.add(Conv2D(32, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='relu',
-                 kernel_initializer='he_uniform'))
+                   kernel_initializer='he_uniform'))
 encoder.add(Conv2D(32, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='relu',
-                 kernel_initializer='he_uniform'))
+                   kernel_initializer='he_uniform'))
 encoder.add(Conv2D(32, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='relu',
-                 kernel_initializer='he_uniform'))
+                   kernel_initializer='he_uniform'))
 encoder.add(BatchNormalization(axis=-1))
 
 decoder = Sequential()
 decoder.add(Conv2DTranspose(32, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='relu',
-                          kernel_initializer='he_uniform'))
+                            kernel_initializer='he_uniform'))
 decoder.add(Conv2DTranspose(32, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='relu',
-                          kernel_initializer='he_uniform'))
+                            kernel_initializer='he_uniform'))
 decoder.add(Conv2DTranspose(32, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='relu',
-                          kernel_initializer='he_uniform'))
+                            kernel_initializer='he_uniform'))
 decoder.add(Conv2DTranspose(64, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='relu',
-                          kernel_initializer='he_uniform'))
+                            kernel_initializer='he_uniform'))
 decoder.add(BatchNormalization(axis=-1))
 decoder.add(
-    Conv2D(1, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='sigmoid', padding='same'))"""
+    Conv2D(1, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='sigmoid', padding='same'))
 
-#model = Sequential([encoder,decoder])
+model = Sequential([encoder, decoder])
 
-
-#opt = tf.keras.optimizers.Adam(learning_rate=0.01)
 # Compile and fit data
-#model.compile(optimizer='adam', loss='binary_crossentropy')
+model.compile(optimizer='adam', loss='binary_crossentropy')
 model.fit(noisy_input, pure,
           epochs=no_epochs,
           batch_size=batch_size,
           validation_split=validation_split)
 model.summary()
-model.save("models/")
+model.save("models-fashion/")
 
 # Generate denoised images
 samples = noisy_input_test[:number_of_visualizations]
