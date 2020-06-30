@@ -1,14 +1,12 @@
 import tensorflow as tf
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, Conv2DTranspose
+from tensorflow.keras.layers import Conv2D, Conv2DTranspose, MaxPooling2D, UpSampling2D
 from tensorflow.keras.constraints import max_norm
 from tensorflow.keras import backend as K
 import matplotlib.pyplot as plt
 import numpy as np
 from tensorflow_core.python.keras.layers import LeakyReLU, BatchNormalization
-
-import input_data
 
 # Model configuration
 img_width, img_height = 28, 28
@@ -51,8 +49,28 @@ noise = np.random.normal(0, 1, pure.shape)
 noise_test = np.random.normal(0, 1, pure_test.shape)
 noisy_input = pure + noise_factor * noise
 noisy_input_test = pure_test + noise_factor * noise_test
-
 # Create the model
+encoder = Sequential()
+input_img = tf.keras.layers.Input(shape=(28,28,1))
+#encoder
+encoder.add(input_img)
+encoder.add(Conv2D(16, (3,3),strides = 1 , activation = 'relu',padding='same'))
+encoder.add(MaxPooling2D((2,2)))
+encoder.add(Conv2D(8,(3,3),strides = 1, activation='relu',padding='same'))
+encoder.add(MaxPooling2D((2,2),padding = 'same'))
+encoder.add(Conv2D(8,(3,3),strides = 1,activation = 'relu',padding='same'))
+#decoder network
+decoder = Sequential()
+decoder.add(Conv2DTranspose(8,(3,3),strides = 1,activation='relu',padding='same'))
+decoder.add(UpSampling2D((2,2)))
+decoder.add(Conv2DTranspose(16,(3,3),strides = 1,activation='relu',padding = 'same'))
+decoder.add(UpSampling2D((2,2)))
+decoder.add(Conv2DTranspose(1,(3,3),strides = 1, activation='sigmoid',padding  ='same'))
+model = Sequential([encoder,decoder])
+#model = tf.keras.Model(input_img, m)
+model.compile(optimizer='Adam', loss='binary_crossentropy')
+#model.summary()
+
 """encoder = Sequential()
 for f in (256,128):
     # apply a CONV => RELU => BN operation
@@ -66,7 +84,7 @@ for f in (128,256):
     decoder.add(Conv2DTranspose(f, (3, 3), strides=2, padding="same", activation='relu'))
     decoder.add(LeakyReLU(alpha=0.2))
     decoder.add(BatchNormalization(axis=-1))"""
-encoder = Sequential()
+"""encoder = Sequential()
 encoder.add(Conv2D(64, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='relu',
                  kernel_initializer='he_uniform', input_shape=input_shape))
 encoder.add(Conv2D(32, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='relu',
@@ -88,14 +106,14 @@ decoder.add(Conv2DTranspose(64, kernel_size=(3, 3), kernel_constraint=max_norm(m
                           kernel_initializer='he_uniform'))
 decoder.add(BatchNormalization(axis=-1))
 decoder.add(
-    Conv2D(1, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='sigmoid', padding='same'))
+    Conv2D(1, kernel_size=(3, 3), kernel_constraint=max_norm(max_norm_value), activation='sigmoid', padding='same'))"""
 
-model = Sequential([encoder,decoder])
+#model = Sequential([encoder,decoder])
 
 
 #opt = tf.keras.optimizers.Adam(learning_rate=0.01)
 # Compile and fit data
-model.compile(optimizer='adam', loss='binary_crossentropy')
+#model.compile(optimizer='adam', loss='binary_crossentropy')
 model.fit(noisy_input, pure,
           epochs=no_epochs,
           batch_size=batch_size,
