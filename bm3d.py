@@ -292,3 +292,15 @@ def BM3D_2nd_step(_basicImg, _noisyImg):
     Final.astype(numpy.uint8)
 
     return Final
+
+
+def bm3d_denoise(noisy_image):
+    noisy_image = noisy_image.reshape(noisy_image.shape[0], 64, 64)
+    noisy_image = noisy_image * 255.0
+    denoised = []
+    for i in range(0,1):
+        Basic_img = BM3D_1st_step(noisy_image[i])
+        Final_img = BM3D_2nd_step(Basic_img, noisy_image[i])
+        denoised.append(Final_img)
+        print("Image " + str(i) + " denoised")
+    return numpy.array(denoised)
