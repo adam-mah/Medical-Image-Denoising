@@ -11,9 +11,7 @@ def PSNR(img1, img2):
     return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
 
 def get_image_ssim(original_img,noisy_img):
-    ssim_sum = 0
-    return ssim(original_img, noisy_img,data_range=original_img.max() - noisy_img.min(), multichannel=False)
-    #return 1.0*ssim_sum/originalSet.shape[0]
+    return ssim(original_img*255.0, noisy_img*255.0,data_range=original_img.max() - noisy_img.min(), multichannel=False)
 
 def get_set_ssim(originalSet,noisySet):
     ssim_sum = 0
