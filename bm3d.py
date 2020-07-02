@@ -295,7 +295,6 @@ def BM3D_2nd_step(_basicImg, _noisyImg):
 
 
 def bm3d_denoise(noisy_image):
-    # noisy_image = noisy_image.reshape(noisy_image.shape[0], 64, 64)
     noisy_image = noisy_image * 255.0
     denoised = []
     Basic_img = BM3D_1st_step(noisy_image)

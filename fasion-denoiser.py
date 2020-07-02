@@ -11,7 +11,7 @@ from tensorflow_core.python.keras.layers import LeakyReLU, BatchNormalization
 # Model configuration
 img_width, img_height = 28, 28
 batch_size = 100
-no_epochs = 15
+no_epochs = 5
 validation_split = 0.2
 verbosity = 1
 max_norm_value = 2.0

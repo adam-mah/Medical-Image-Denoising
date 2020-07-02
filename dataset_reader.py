@@ -37,6 +37,26 @@ def read_dental(folder= "data/dental/"):
             images.append(img)
     return numpy.array(images)
 
+def read_covid(folder= "data/covid/"):
+    images = []
+    for filename in os.listdir(folder):
+        img = cv2.imread(os.path.join(folder, filename), cv2.IMREAD_GRAYSCALE)
+
+        if img is not None:
+            #img = cv2.resize(img, (64, 64))
+            images.append(img)
+    return numpy.array(images)
+
+def read_dx(folder= "data/DX/"):
+    images = []
+    for filename in os.listdir(folder):
+        img = cv2.imread(os.path.join(folder, filename), cv2.IMREAD_GRAYSCALE)
+
+        if img is not None:
+            #img = cv2.resize(img, (64, 64))
+            images.append(img)
+    return numpy.array(images)
+
 def read_mini_mias():
     images_tensor = numpy.zeros((322, 1024, 1024))
     i = 0
@@ -50,15 +70,16 @@ def read_mini_mias():
 def read_all_datasets():
     x = read_mini_mias()
     y = read_dental()
-    return x ,y
+    z = read_covid()
+    return x ,y, z
 
 
 if __name__ == "__main__":
     from matplotlib import pyplot
-    x, y = read_all_datasets()
+    x = read_dx()
     # image = read_pgm("data/all-mias/mdb001.pgm", byteorder='<')
     #images = numpy.zeros((322, 64, 64))
     #for i in range(x.shape[0]):
    #     images[i] = cv2.resize(x[i].reshape(1024, 1024), dsize=(64, 64), interpolation=cv2.INTER_CUBIC)
-    pyplot.imshow(y[0], pyplot.cm.gray)
+    pyplot.imshow(x[0], pyplot.cm.gray)
     pyplot.show()
