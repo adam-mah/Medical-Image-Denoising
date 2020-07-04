@@ -10,43 +10,45 @@ from tensorflow_core.python.keras import Input
 from tensorflow_core.python.keras.constraints import max_norm
 from tensorflow_core.python.keras.layers import BatchNormalization, LeakyReLU, Reshape
 from tensorflow.keras.models import Model
-from tensorflow_core.python.keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam
 
 
-def get_simple_autoencoder_model(model_path=None, img_width=64, img_height=64):
-    encoder = Sequential()
-    encoder.add(Input(shape=(img_width, img_height, 1)))
-    encoder.add(Conv2D(64, (4, 4), activation='relu', padding='same'))
-    encoder.add(MaxPooling2D((2, 2), padding='same'))
-    encoder.add(Conv2D(64, (4, 4), activation='relu', padding='same'))
-    encoder.add(MaxPooling2D((2, 2), padding='same'))
-    # encoder.summary()
-    decoder = Sequential()
-    decoder.add(Conv2D(64, (4, 4), activation='relu', padding='same'))
-    decoder.add(UpSampling2D((2, 2)))
-    decoder.add(Conv2D(64, (4, 4), activation='relu', padding='same'))
-    decoder.add(UpSampling2D((2, 2)))
-    decoder.add(Conv2D(1, (4, 4), activation='sigmoid', padding='same'))
-    # decoder.summary()
-    autoencoder = Sequential([encoder, decoder])
-    autoencoder.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+# def get_autoencoder_model(img_width=64, img_height=64):
+#     encoder = Sequential()
+#     encoder.add(Input(shape=(img_width, img_height, 1)))
+#     encoder.add(Conv2D(64, (3, 3), activation='relu', padding='same'))
+#     encoder.add(MaxPooling2D((2, 2), padding='same'))
+#     encoder.add(Conv2D(64, (3, 3), activation='relu', padding='same'))
+#     encoder.add(MaxPooling2D((2, 2), padding='same'))
+#     # encoder.summary()
+#     decoder = Sequential()
+#     decoder.add(Conv2D(64, (3, 3), activation='relu', padding='same'))
+#     decoder.add(UpSampling2D((2, 2)))
+#     decoder.add(Conv2D(64, (3, 3), activation='relu', padding='same'))
+#     decoder.add(UpSampling2D((2, 2)))
+#     decoder.add(Conv2D(1, (3, 3), activation='sigmoid', padding='same'))
+#     # decoder.summary()
+#     autoencoder = Sequential([encoder, decoder])
+#     autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+#
+#     return autoencoder
 
-    return autoencoder
 
-
-def get_simple_autoencoder_model(img_width=64, img_height=64):
+def get_autoencoder_model(img_width=64, img_height=64):
     autoencoder = Sequential()
+    # Encoder
     autoencoder.add(Input(shape=(img_width, img_height, 1)))
     autoencoder.add(Conv2D(64, (3, 3), activation='relu', padding='same'))
     autoencoder.add(MaxPooling2D((2, 2), padding='same'))
     autoencoder.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
     autoencoder.add(MaxPooling2D((2, 2), padding='same'))
+    # Decoder
     autoencoder.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
     autoencoder.add(UpSampling2D((2, 2)))
     autoencoder.add(Conv2D(64, (3, 3), activation='relu', padding='same'))
     autoencoder.add(UpSampling2D((2, 2)))
     autoencoder.add(Conv2D(1, (3, 3), activation='sigmoid', padding='same'))
-    autoencoder.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    autoencoder.compile(optimizer=Adam(), loss='binary_crossentropy', metrics=['accuracy'])
     autoencoder.summary()
     return autoencoder
 
@@ -67,66 +69,6 @@ def get_simple_autoencoder_model128(img_width=128, img_height=128):
     autoencoder.summary()
     return autoencoder
 
-
-def get_skip_model():
-    # Input
-    input_img = Input(shape=(64, 64, 1))
-    # Encoder
-    y = Conv2D(16, (3, 3), padding='same')(input_img)
-    y = MaxPooling2D((2,2), padding='same')(y)
-    y = LeakyReLU()(y)
-    y = Conv2D(32, (3, 3), padding='same')(y)
-    y = MaxPooling2D((2, 2), padding='same')(y)
-    y = LeakyReLU()(y)
-    y1 = Conv2D(64, (3, 3), padding='same')(y)  # skip-1
-    y = MaxPooling2D((2, 2), padding='same')(y)
-    y = LeakyReLU()(y1)
-    y = Conv2D(128, (3, 3), padding='same')(y)
-    y = MaxPooling2D((2, 2), padding='same')(y)
-    y = LeakyReLU()(y)
-    y2 = Conv2D(128, (3, 3), padding='same')(y)  # skip-2
-    y = MaxPooling2D((2, 2), padding='same')(y)
-    y = LeakyReLU()(y2)
-    y = Conv2D(256, (3, 3), padding='same')(y)
-    y = MaxPooling2D((2, 2), padding='same')(y)
-    y = LeakyReLU()(y)
-    y = Conv2D(512, (3, 3), padding='same')(y)
-    y = MaxPooling2D((2, 2), padding='same')(y)
-    y = LeakyReLU()(y)
-    # Flattening for the bottleneck
-    vol = y.shape
-    x = Flatten()(y)
-    latent = Dense(64, activation='relu')(x)
-    # Decoder
-    y = Dense(np.prod(vol[1:]), activation='relu')(latent)  # accepting the output from the bottleneck layer
-    y = Reshape((vol[1], vol[2], vol[3]))(y)
-    y = Conv2DTranspose(512, (3, 3), padding='same')(y)
-    y = LeakyReLU()(y)
-    y = Conv2DTranspose(256, (3, 3), padding='same', strides=(2, 2))(y)
-    y = LeakyReLU()(y)
-    y = Conv2DTranspose(128, (3, 3), padding='same', strides=(2, 2))(y)
-    y = Add()([y1, y])  # remove to run model without skip connections
-    y = lrelu_bn(y)  # remove to run model without skip connections
-    y = Conv2DTranspose(128, (3, 3), padding='same', strides=(2, 2))(y)
-    y = LeakyReLU()(y)
-    y = Conv2DTranspose(64, (3, 3), padding='same', strides=(2, 2))(y)
-    y = Add()([y2, y])  # remove to run model without skip connections
-    y = lrelu_bn(y)  # remove to run model without skip connections
-    y = Conv2DTranspose(32, (3, 3), padding='same', strides=(2, 2))(y)
-    y = LeakyReLU()(y)
-    y = Conv2DTranspose(16, (3, 3), padding='same', strides=(2, 2))(y)
-    y = LeakyReLU()(y)
-    y = Conv2DTranspose(1, (3, 3), activation='sigmoid', padding='same', strides=(2, 2))(y)
-    autoencoder = Model(input_img,y)#Adam(0.001,beta_1=0.9)
-    autoencoder.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-    autoencoder.summary()
-    return autoencoder
-
-# Helper function to apply activation and batch normalization to the # output added with output of residual connection from the encoder
-def lrelu_bn(inputs):
-   lrelu = LeakyReLU()(inputs)
-   bn = BatchNormalization()(lrelu)
-   return bn
 
 def get_gated_connections(gatePercentageFactor, inputLayer):
     gateFactor = Input(tensor=tf.keras.backend.variable([gatePercentageFactor]))
@@ -183,6 +125,6 @@ def get_cnn_dsc_architecture(model_path=None, img_width=64, img_height=64):
     layers = y5
 
     sym_autoencoder = Model([input_img, gf1, gf2, gf3, gf4], layers)
-    sym_autoencoder.compile(optimizer='sgd', loss='mean_squared_error', metrics=['accuracy'])
+    sym_autoencoder.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
     return sym_autoencoder
