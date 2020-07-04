@@ -8,7 +8,7 @@ import measure
 
 def plot_samples(noise_vals, noisy_input_test, denoised_images, pure_test, nu_samples=4, img_height=64, img_width=64):
     noise_prop, noise_std, noise_mean = noise_vals
-
+    plt.rcParams.update(plt.rcParamsDefault)
     fig, axes = plt.subplots(nu_samples, 5)  # nu_samples rows and 5 columns
     fig.set_size_inches(16, 5 * nu_samples)  # Set window size
 
@@ -66,7 +66,7 @@ def plot_samples(noise_vals, noisy_input_test, denoised_images, pure_test, nu_sa
 
 def save_samples(noise_vals, noisy_input_test, denoised_images, pure_test, img_height=64, img_width=64):
     noise_prop, noise_std, noise_mean = noise_vals
-
+    plt.style.use('classic')
     fig, axes = plt.subplots(1, 5)
     fig.set_size_inches(20, 5)
     axes[0].set_title('Original image')
