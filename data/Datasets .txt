@@ -1,0 +1,4 @@
+Mini-MIAS: http://peipa.essex.ac.uk/info/mias.html
+DX-Dataset: http://www-o.ntust.edu.tw/~cweiwang/ISBI2015/challenge1/
+COVID XRays: https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia
+Dental dataset: https://mynotebook.labarchives.com/share/Vahab/MjAuOHw4NTc2Mi8xNi9UcmVlTm9kZS83NzM5OTk2MDZ8NTIuOA

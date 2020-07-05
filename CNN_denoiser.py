@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from tensorflow_core.python.keras.callbacks import EarlyStopping
+
 import autoencoder
-import samples_plt
 
 
 class CNN_denoiser():
@@ -11,7 +10,10 @@ class CNN_denoiser():
         self.batch_size = batch_size
         self.nu_epochs = nu_epochs
         self.validation_split = validation_split
-        self.model = autoencoder.get_simple_autoencoder_model(img_width=img_width, img_height=img_height)
+        if img_width == 128 and img_height == 128:
+            self.model = autoencoder.get_autoencoder_model128(img_width=img_width, img_height=img_height)
+        else:
+            self.model = autoencoder.get_autoencoder_model(img_width=img_width, img_height=img_height)
 
     def model_plots(self, noise_prop, noise_mean, noise_std):
         # summarize history for loss

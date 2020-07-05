@@ -1,13 +1,11 @@
 import argparse
 
 import cv2
-from tensorflow_core.python.keras.callbacks import EarlyStopping
+import numpy as np
 
-import autoencoder
-from CNN_denoiser import CNN_denoiser
 import dataset_reader
 import samples_plt
-import numpy as np
+from CNN_denoiser import CNN_denoiser
 
 
 def load_datasets(img_width=64, img_height=64):
@@ -57,7 +55,7 @@ class Range(object):
 if __name__ == "__main__":
     img_width, img_height = 64, 64
     batch_size = 10
-    nu_epochs = 100
+    nu_epochs = 50
     validation_split = 0
     train_split = 0.9
     verbosity = 1
@@ -68,6 +66,10 @@ if __name__ == "__main__":
     shuffle_test_set = False
 
     parser = argparse.ArgumentParser(description='Image Denoiser')
+    parser.add_argument("-load", "--load", help="Path of dataset to load [default = DX and MIAS are loaded]", type=str)
+    parser.add_argument("-size", "--size", help="Image size 64x64 or 128x128 [choices = 128, 64] [default = 64]",
+                        type=int,
+                        choices=[128, 64])
     parser.add_argument("-p", "--proportion", help="Gaussian noise proportion [default = 0.1]", type=float)
     parser.add_argument("-std", "--sdeviation", help="Gaussian noise standard deviation [default = 1]", type=float)
     parser.add_argument("-m", "--mean", help="Gaussian noise mean [default = 0]", type=float)
@@ -100,14 +102,29 @@ if __name__ == "__main__":
         train_split = args.trainsplit
     if args.shuffle:
         shuffle_test_set = True
+    if args.size:
+        img_width = args.size
+        img_height = args.size
 
     print("[LOG] Loading datasets...")
-    mias_images, dx_images = load_datasets(img_width, img_height)  # Load mias and DX datasets
-    print("[LOG] Load completed\n[LOG] Splitting datasets with [{0}] train set size\n[LOG] Shuffle test set: {1}".format(train_split, shuffle_test_set))
-    input_train, input_test = CNN_denoiser.train_test_split(mias_images, dx_images, train_split=train_split,
-                                                            shuffle_test_set=shuffle_test_set)  # Split both sets to train and test sets
-    #input_train, input_test = CNN_denoiser.train_test_split2(dx_images, train_split=train_split, shuffle_test_set=shuffle_test_set)  # Split both sets to train and test sets
-    #input_train, input_test = train_test_split3(mias_images, dx_images, dental_images, shuffle_test_set=True)
+    if args.load:
+        print("[LOG] Loading data set from [{0}]".format(args.load))
+        data_images = dataset_reader.read_dataset(args.load, img_width, img_height)
+        input_train, input_test = CNN_denoiser.train_test_split1(data_images, train_split=train_split,
+                                                                 shuffle_test_set=shuffle_test_set, img_width=img_width,
+                                                                 img_height=img_height)  # Split 1 set to train and test sets
+    else:
+        print("Loading default datasets, MIAS and DX")
+        mias_images, dx_images = load_datasets(img_width, img_height)  # Load mias and DX datasets
+        input_train, input_test = CNN_denoiser.train_test_split(mias_images, dx_images, train_split=train_split,
+                                                                shuffle_test_set=shuffle_test_set, img_width=img_width,
+                                                                img_height=img_height)  # Split both sets to train and test sets
+    print(
+        "[LOG] Load completed\n" + "[LOG] Image size {0}x{1}".format(img_width,
+                                                                     img_height) + "\n[LOG] Splitting datasets with [{0}] train set size\n[LOG] Shuffle test set: {1}".format(
+            train_split, shuffle_test_set))
+    # input_train, input_test = CNN_denoiser.train_test_split2(dx_images, train_split=train_split, shuffle_test_set=shuffle_test_set)  # Split 1 set to train and test sets
+    # input_train, input_test = train_test_split3(mias_images, dx_images, dental_images, shuffle_test_set=True)
 
     # Parse numbers as floats
     input_train = input_train.astype('float32')
@@ -124,14 +141,14 @@ if __name__ == "__main__":
     noisy_input, noisy_input_test = add_noise(pure, pure_test)  # Add Gaussian noise to train and test sets
 
     print("[LOG] Initializing model...\nEPOCHS: {0}\nBatch size: {1}\nValidation split: {2}".format(nu_epochs,
-                                                                                                     batch_size,
-                                                                                                     validation_split))
+                                                                                                    batch_size,
+                                                                                                    validation_split))
     # Create the model
     cnn_denoiser = CNN_denoiser(batch_size=batch_size, nu_epochs=nu_epochs, validation_split=validation_split,
                                 img_height=img_height, img_width=img_width)
     print("[LOG] Training and evaluating model...")
     cnn_denoiser.train(noisy_input, pure, verbosity=verbosity)
-#    cnn_denoiser.evaluate(noisy_input_test, pure_test)
+    #    cnn_denoiser.evaluate(noisy_input_test, pure_test)
     if args.plot:
         cnn_denoiser.model_plots(noise_prop, noise_mean, noise_std)
 

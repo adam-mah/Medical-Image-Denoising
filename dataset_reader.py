@@ -4,6 +4,7 @@ import re
 import cv2
 import numpy
 
+
 def read_pgm(filename, byteorder='>'):
     """Return image data from a raw PGM file as numpy array.
 
@@ -27,35 +28,38 @@ def read_pgm(filename, byteorder='>'):
                             ).reshape((int(height), int(width)))
 
 
-def read_dental(folder= "data/dental/"):
+def read_dental(folder="data/dental/"):
     images = []
     for filename in os.listdir(folder):
         img = cv2.imread(os.path.join(folder, filename), cv2.IMREAD_GRAYSCALE)
 
         if img is not None:
-            #img = cv2.resize(img, (64, 64))
+            # img = cv2.resize(img, (64, 64))
             images.append(img)
     return numpy.array(images)
 
-def read_covid(folder= "data/covid/"):
+
+def read_covid(folder="data/covid/"):
     images = []
     for filename in os.listdir(folder):
         img = cv2.imread(os.path.join(folder, filename), cv2.IMREAD_GRAYSCALE)
 
         if img is not None:
-            #img = cv2.resize(img, (64, 64))
+            # img = cv2.resize(img, (64, 64))
             images.append(img)
     return numpy.array(images)
 
-def read_dx(folder= "data/DX/"):
+
+def read_dx(folder="data/DX/"):
     images = []
     for filename in os.listdir(folder):
         img = cv2.imread(os.path.join(folder, filename), cv2.IMREAD_GRAYSCALE)
 
         if img is not None:
-            #img = cv2.resize(img, (64, 64))
+            # img = cv2.resize(img, (64, 64))
             images.append(img)
     return numpy.array(images)
+
 
 def read_mini_mias():
     images_tensor = numpy.zeros((322, 1024, 1024))
@@ -67,19 +71,35 @@ def read_mini_mias():
                 i += 1
     return images_tensor
 
+
+def read_dataset(path=None, img_width=64, img_height=64):
+    try:
+        images = []
+        for filename in os.listdir(path):
+            img = cv2.imread(os.path.join(path, filename), cv2.IMREAD_GRAYSCALE)
+
+            if img is not None:
+                img = cv2.resize(img, (img_width, img_height))
+                images.append(img)
+        return numpy.array(images)
+    except:
+        print("Error has occured during data loading")
+
+
 def read_all_datasets():
     x = read_mini_mias()
     y = read_dental()
     z = read_covid()
-    return x ,y, z
+    return x, y, z
 
 
 if __name__ == "__main__":
     from matplotlib import pyplot
+
     x = read_dx()
     # image = read_pgm("data/all-mias/mdb001.pgm", byteorder='<')
-    #images = numpy.zeros((322, 64, 64))
-    #for i in range(x.shape[0]):
-   #     images[i] = cv2.resize(x[i].reshape(1024, 1024), dsize=(64, 64), interpolation=cv2.INTER_CUBIC)
+    # images = numpy.zeros((322, 64, 64))
+    # for i in range(x.shape[0]):
+    #     images[i] = cv2.resize(x[i].reshape(1024, 1024), dsize=(64, 64), interpolation=cv2.INTER_CUBIC)
     pyplot.imshow(x[0], pyplot.cm.gray)
     pyplot.show()
