@@ -20,7 +20,6 @@ Project based on Medical image denoising using convolutional denoising autoencod
 Paper: https://arxiv.org/pdf/1608.04667.pdf  
   
 By Adam Mahameed  
-   Karam Abu Mokh
 
 Sample:
 ![Image of Output](https://github.com/adam-mah/Medical-Image-Denoising/blob/master/Samples/0.1%200%201%20(3).png?raw=true)  
